@@ -1,0 +1,45 @@
+Methods, variables, and filenames should all use snake_case.
+Constants are all uppercase. ex. "FOUR = 'four'"
+When working with blocks, use {} when the entire expression fits on a single line, and do...end for when it doesn't.
+Class names are always PascalCase.
+
+Indentation is always two spaces per level, not hard tabs.
+Limit lines to 80 characters in length.
+Avoid trailing whitespace.
+Do not terminate expressions with semicolons.
+No space after !.
+Put empty lines between methods.
+Dont use two or more empty lines.
+
+One expression per line. e.g., 
+puts 'foo'
+puts 'bar'
+and not
+puts 'foo'; puts 'bar'
+
+Use spaces around operators, after commas, colons, and semicolons. example:
+a, b = 1, 2
+class FooError < StandardError; end
+exceptions: Exponent operator, Slash in rational literals, Safe navigation operator.
+e = M * c**2
+o_scale = 1/48r
+foo&.bar
+
+No spaces inside parentheses and square brackets. Use spaces around curly brackets. (Do not leave trailing whitespace though)
+some(arg).other
+[1, 2, 3].each { |e| puts e }
+
+With interpolated expressions, there should be no padded-spacing inside the braces.
+Bad example : "From: #{ user.first_name }, #{ user.last_name }"
+Good example: "From: #{user.first_name}, #{user.last_name}"
+
+No spaces inside range literals
+1..3
+'a'...'z'
+
+Indent when as deep as case
+case
+when song.name == 'Misty'
+  puts 'Not again!'
+when song.duration > 120
+  puts 'Too long!'
