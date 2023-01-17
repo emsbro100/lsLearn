@@ -1,0 +1,23 @@
+1. Where to Find Documentation
+Documentation can be found at https://ruby-doc.org/.
+
+2. while Loops
+The description for while loops is found at https://ruby-doc.org/2.7.7/syntax/control_expressions_rdoc.html#label-while+Loop
+
+3. Return Value of while
+A while loop returns nil, unless a value is supplied within a break statement.
+
+4. Return Value of break
+break sets the return value to the value of the caller. For example. my_var = while...end will set my_var to the value of the break.
+
+5. Large Numbers
+You can use underscores to increase readability for long integers. ex: 1_000_000
+
+6. Symbol Syntax
+Symbols have a colon in front and no quotes surrounding. Quotes can be used within symbol names to utilize spaces. ex: :"David Albrecht"
+
+7. String Class
+The docs from String can be found at https://ruby-doc.org/2.7.7/String.html
+
+8. Right Justifying Strings
+String.rjust can be used to right justify strings.

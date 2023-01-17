@@ -1,0 +1,32 @@
+1.
+It will print 17 because b is a pointer to the same value held by a, so when b is modified a is as well.
+Correction: it prints 7 because integers are immutable.
+
+2.
+It will print 7 for the same reason exercise 1 printed 7. The name of the argument variable being the same as the name
+of the actual variable does not matter since due to the scope of methods a is initialized locally.
+
+3.
+It will return and print 7, because the local variable a is not modified at all.
+
+4.
+It will print "Xy-zy" because with b[2] the value is being directly mutated.
+
+5.
+It will print "Xyzzy" because within the method b is being reassigned to another value, rather than the value being modified.
+
+6.
+It will print 7 for the same reason as in 5, as well as because integers are immutable.
+Correction: it raises an exception because a is not initialized within the method.
+
+7.
+It will print 3 because each has access to local scope, and 3 was the last value a was assigned to.
+
+8.
+It will raise an exception because a is only defined within the scope of the block.
+
+9.
+It will print 7 because a is initialized as an instance variable for every iteraction of each.
+
+10.
+It will raise an exception because a is not initialized within the method.

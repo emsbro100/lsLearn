@@ -1,0 +1,10 @@
+1. Methods Without Arguments
+"xyz".upcase
+
+2. Required Arguments
+a.insert(3, 5, 6, 7)
+
+3. Optional Arguments
+The first will print ["abc", "def", "ghi,jkl", "mno", "pqr,stu", "vwx", "yz"].
+The second will print ["abc def ghi", "jkl mno pqr", "stu vwx yz"].
+The third will print ["abc def ghi", "jkl mno pqr,stu vwx yz"].
