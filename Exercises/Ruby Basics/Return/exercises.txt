@@ -1,0 +1,29 @@
+1. Breakfast, Lunch, or Dinner? (Part 1)
+It will print "Breakfast".
+
+2. Breakfast, Lunch, or Dinner? (Part 2)
+It will print "Evening".
+
+3. Breakfast, Lunch, or Dinner? (Part 3)
+It will print "Breakfast".
+
+4. Breakfast, Lunch, or Dinner? (Part 4)
+It will print "Dinner" on one line, then "Breakfast" on the next line.
+
+5. Breakfast, Lunch, or Dinner? (Part 5)
+It will print "Dinner" on one line, then nil on the next line.
+
+6. Breakfast, Lunch, or Dinner? (Part 6)
+It will print "Breakfast".
+
+7. Counting Sheep (Part 1)
+It will print the numbers 0 through 5.
+
+8. Counting Sheep (Part 2)
+It will print the numbers: 0, 1, 2, 4, 5, 10.
+
+9. Counting Sheep (Part 3)
+It will print the numbers: 0, 1, 2, nil.
+
+10. Tricky Number
+It will print the number 1.
