@@ -17,7 +17,7 @@
 START
 
 DEFINE input_parser
-  # Receives one argument, type 
+  # Receives one argument, type
   IF type x
     input = input_loop(x_validator, x_response)
   IF type y
@@ -41,22 +41,27 @@ END
 require "YAML"
 
 langfile = "Translations/"
-languages = {"en" => "english.yml",
-             "es" => "espanol.yml",
-             "fr" => "francais.yml"}
-CONFIG = YAML.load(File.read("config.yml")).transform_keys(&:to_sym)
+languages = {
+  "en" => "english.yml",
+  "es" => "espanol.yml",
+  "fr" => "francais.yml"
+}
+CONFIG = YAML.safe_load(File.read("config.yml")).transform_keys(&:to_sym)
 if languages.keys.include?(CONFIG[:language])
   langfile << languages[CONFIG[:language]]
-  PROMPTS = YAML.load(File.read(langfile)).transform_keys(&:to_sym)
+  PROMPTS = YAML.safe_load(File.read(langfile))
 else
-  puts "Calculator does not have a translation for the specified language! Press enter to load the program in English..."
+  puts "Calculator does not have a translation for the specified language! "\
+       "Press enter to load the program in English..."
   gets()
-  PROMPTS = YAML.load(File.read("Translations/english.yml")).transform_keys(&:to_sym)
+  PROMPTS = YAML.safe_load(File.read("Translations/english.yml"))
 end
-OPERATIONS = {add:      PROMPTS[:operations]["add"],
-              subtract: PROMPTS[:operations]["subtract"],
-              multiply: PROMPTS[:operations]["multiply"],
-              divide:   PROMPTS[:operations]["divide"]}
+OPERATIONS = {
+  add: PROMPTS["operations"]["add"],
+  subtract: PROMPTS["operations"]["subtract"],
+  multiply: PROMPTS["operations"]["multiply"],
+  divide: PROMPTS["operations"]["divide"]
+}
 
 def prompt(message)
   puts "=> #{message}"
@@ -76,58 +81,57 @@ end
 def get_input(type)
   input = case type
           when :bool # Returns y/n
-            input_loop(method(:bool?), PROMPTS[:input]["bool"])
+            input_loop(method(:bool?), PROMPTS["input"]["bool"])
           when :number # Returns a float
-            input_loop(method(:number?), PROMPTS[:input]["number"]).to_f
+            input_loop(method(:number?), PROMPTS["input"]["number"]).to_f
           when :operation # Returns add/subtract/multiply/divide
-            input_loop(method(:operation?), PROMPTS[:input]["operation"])
+            input_loop(method(:operation?), PROMPTS["input"]["operation"])
           end
-  return input
+  input
 end
 
 def bool?(input)
-  valid = [PROMPTS[:input]["bool_yes"], PROMPTS[:input]["bool_no"]]
+  valid = [PROMPTS["input"]["bool_yes"], PROMPTS["input"]["bool_no"]]
   valid.push(valid[0][0]) # Add "y"
   valid.push(valid[1][0]) # Add "n"
   if valid.include?(input)
-    return true
+    true
   else
-    return false
+    false
   end
 end
 
 def number?(input)
-  if input.include?('.') # Algorithm to verify floats
-    parts = input.split('.')
-    # Maps true/false to whether part contains a non-numeric character
-    parts.map! { |part| part.match(/[\D]/) ? true : false }
-    return true if !(parts.size > 2) && !(parts.include?(true))
-  elsif !(input.match(/\D/)) && input.length > 0 # Algorithm to verify integers
-    return true
+  parts = input.split('.')
+  # Maps true/false to whether part contains a non-numeric character
+  parts.map! { |part| part.match(/[\D]/) ? true : false }
+  if parts.size <= 2 && !(parts.include?(true))
+    true
   else
-    return false
+    false
   end
 end
 
 def operation?(input)
   if OPERATIONS.values.include?(input)
-    return true
+    true
   else
-    return false
+    false
   end
 end
 
-prompt PROMPTS[:welcome]
+prompt PROMPTS["welcome"]
 puts ""
 
 loop do # Begin main program loop
-  prompt PROMPTS[:ask_numbers]
-  prompt PROMPTS[:ask_numbers_2]
+  prompt PROMPTS["ask_numbers"]
+  prompt PROMPTS["ask_numbers_2"]
   num1 = get_input(:number)
   num2 = get_input(:number)
 
-  prompt PROMPTS[:ask_operation]
-  prompt "(#{OPERATIONS[:add]}/#{OPERATIONS[:subtract]}/#{OPERATIONS[:multiply]}/#{OPERATIONS[:divide]})"
+  prompt PROMPTS["ask_operation"]
+  prompt "(#{OPERATIONS[:add]}/#{OPERATIONS[:subtract]}/"\
+         "#{OPERATIONS[:multiply]}/#{OPERATIONS[:divide]})"
   operation = get_input(:operation)
 
   result = case operation
@@ -140,10 +144,10 @@ loop do # Begin main program loop
            when OPERATIONS[:divide]
              num1 / num2
            end
-  prompt "#{PROMPTS[:result]} #{result}"
-  prompt PROMPTS[:ask_repeat]
+  prompt "#{PROMPTS['result']} #{result}"
+  prompt PROMPTS["ask_repeat"]
   continue = get_input(:bool)
-  if continue[0] == PROMPTS[:input]["bool_no"][0]
+  if continue[0] == PROMPTS["input"]["bool_no"][0]
     break
   end
 end
