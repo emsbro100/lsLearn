@@ -1,0 +1,17 @@
+welcome: "¡Bienvenido a Calculadora!"
+ask_numbers: "¿Sobre qué dos números te gustaría realizar una operación?"
+ask_numbers_2: "Ingrese cada número en una línea separada:"
+input:
+  bool_yes: "si"
+  bool_no: "no"
+  bool: "¡Entrada inválida! Por favor ingrese (s/n)"
+  number: "¡Entrada inválida! Introduzca un número entero o flotante:"
+  operation: "¡Operación inválida! Ingrese (sumar/restar/multiplicar/dividir)"
+ask_operation: "¿Qué operación le gustaría realizar en estos números?"
+operations:
+  add: "sumar"
+  subtract: "restar"
+  multiply: "multiplicar"
+  divide: "dividir"
+result: "Resultado:"
+ask_repeat: "¿Le gustaría realizar otra operación? (s/n)"

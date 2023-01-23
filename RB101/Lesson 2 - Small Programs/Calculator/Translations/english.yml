@@ -1,0 +1,17 @@
+welcome: "Welcome to Calculator!"
+ask_numbers: "Which two numbers would you like to perform an operation on?"
+ask_numbers_2: "Please enter each number on a separate line:"
+input:
+  bool_yes: "yes"
+  bool_no: "no"
+  bool: "Invalid input! Please enter (y/n)"
+  number: "Invalid input! Please enter an integer or float:"
+  operation: "Invalid operation! Please enter (add/subtract/multiply/divide)"
+ask_operation: "Which operation would you like to perform on these numbers?"
+operations:
+  add: "add"
+  subtract: "subtract"
+  multiply: "multiply"
+  divide: "divide"
+result: "Result:"
+ask_repeat: "Would you like to perform another operation? (y/n)"

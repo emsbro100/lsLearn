@@ -40,18 +40,32 @@ END
 
 require "YAML"
 
-CONFIG = YAML.load(File.read("calculator.yml")).transform_keys(&:to_sym)
-PROMPTS = CONFIG[:prompts].transform_keys(&:to_sym)
-VALID_OPERATIONS = PROMPTS[:operations].keys
-# NEED TO FIX BOOL CHECK! DOES NOT RETURN PROPERLY
+langfile = "Translations/"
+languages = {"en" => "english.yml",
+             "es" => "espanol.yml",
+             "fr" => "francais.yml"}
+CONFIG = YAML.load(File.read("config.yml")).transform_keys(&:to_sym)
+if languages.keys.include?(CONFIG[:language])
+  langfile << languages[CONFIG[:language]]
+  PROMPTS = YAML.load(File.read(langfile)).transform_keys(&:to_sym)
+else
+  puts "Calculator does not have a translation for the specified language! Press enter to load the program in English..."
+  gets()
+  PROMPTS = YAML.load(File.read("Translations/english.yml")).transform_keys(&:to_sym)
+end
+OPERATIONS = {add:      PROMPTS[:operations]["add"],
+              subtract: PROMPTS[:operations]["subtract"],
+              multiply: PROMPTS[:operations]["multiply"],
+              divide:   PROMPTS[:operations]["divide"]}
+
 def prompt(message)
   puts "=> #{message}"
 end
 
-def input_loop(type, response)
+def input_loop(is_type, response)
   loop do
-    input = gets.chomp
-    if type.call(input)
+    input = gets.chomp.downcase
+    if is_type.call(input)
       return input
     else
       prompt response
@@ -61,18 +75,20 @@ end
 
 def get_input(type)
   input = case type
-          when "bool"
+          when :bool # Returns y/n
             input_loop(method(:bool?), PROMPTS[:input]["bool"])
-          when "number"
-            input_loop(method(:number?), PROMPTS[:input]["number"])
-          when "operation"
+          when :number # Returns a float
+            input_loop(method(:number?), PROMPTS[:input]["number"]).to_f
+          when :operation # Returns add/subtract/multiply/divide
             input_loop(method(:operation?), PROMPTS[:input]["operation"])
           end
   return input
 end
 
 def bool?(input)
-  valid = %w(y yes n no)
+  valid = [PROMPTS[:input]["bool_yes"], PROMPTS[:input]["bool_no"]]
+  valid.push(valid[0][0]) # Add "y"
+  valid.push(valid[1][0]) # Add "n"
   if valid.include?(input)
     return true
   else
@@ -94,7 +110,7 @@ def number?(input)
 end
 
 def operation?(input)
-  if VALID_OPERATIONS.include?(input)
+  if OPERATIONS.values.include?(input)
     return true
   else
     return false
@@ -107,28 +123,27 @@ puts ""
 loop do
   prompt PROMPTS[:ask_numbers]
   prompt PROMPTS[:ask_numbers_2]
-  num1 = get_input("number")
-  num2 = get_input("number")
+  num1 = get_input(:number)
+  num2 = get_input(:number)
 
   prompt PROMPTS[:ask_operation]
-  prompt "(#{PROMPTS[:operations]["add"]}/#{PROMPTS[:operations]["subtract"]}/#{PROMPTS[:operations]["multiply"]}/#{PROMPTS[:operations]["divide"]})"
-  # for database fetch, do prompt "(#{add}/#{subtract}/#{multiply}/#{divide})"
-  operation = get_input("operation")
+  prompt "(#{OPERATIONS[:add]}/#{OPERATIONS[:subtract]}/#{OPERATIONS[:multiply]}/#{OPERATIONS[:divide]})"
+  operation = get_input(:operation)
 
   result = case operation
-           when "add"
+           when OPERATIONS[:add]
              num1 + num2
-           when "subtract"
+           when OPERATIONS[:subtract]
              num1 - num2
-           when "multiply"
+           when OPERATIONS[:multiply]
              num1 * num2
-           when "divide"
-             num1 / num2.to_f
+           when OPERATIONS[:divide]
+             num1 / num2
            end
   prompt "#{PROMPTS[:result]} #{result}"
   prompt PROMPTS[:ask_repeat]
-  continue = get_input("bool")
-  if !continue
+  continue = get_input(:bool)
+  if continue[0] == 'n'
     break
   end
 end

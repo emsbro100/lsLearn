@@ -1,0 +1,17 @@
+welcome: "Bienvenue sur Calculatrice!"
+ask_numbers: "Sur quels nombres aimeriez-vous effectuer une opération?"
+ask_numbers_2: "Veuillez saisir chaque numéro sur une ligne distincte:"
+input:
+  bool_yes: "oui"
+  bool_no: "non"
+  bool: "Entrée invalide! Veuillez entrer (o/n)"
+  number: "Entrée invalide! Veuillez saisir un entier ou un flottant:"
+  operation: "Opération invalide! Veuillez saisir (additionner/soustraire/multiplier/diviser)"
+ask_operation: "Quelle opération souhaitez-vous effectuer sur ces nombres?"
+operations:
+  add: "additionner"
+  subtract: "soustraire"
+  multiply: "multiplier"
+  divide: "diviser"
+result: "Résultat:"
+ask_repeat: "Souhaitez-vous effectuer une autre opération? (o/n)"
