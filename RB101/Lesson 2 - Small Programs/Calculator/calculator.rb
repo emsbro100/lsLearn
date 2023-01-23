@@ -120,7 +120,7 @@ end
 prompt PROMPTS[:welcome]
 puts ""
 
-loop do
+loop do # Begin main program loop
   prompt PROMPTS[:ask_numbers]
   prompt PROMPTS[:ask_numbers_2]
   num1 = get_input(:number)
@@ -143,7 +143,7 @@ loop do
   prompt "#{PROMPTS[:result]} #{result}"
   prompt PROMPTS[:ask_repeat]
   continue = get_input(:bool)
-  if continue[0] == 'n'
+  if continue[0] == PROMPTS[:input]["bool_no"][0]
     break
   end
 end
