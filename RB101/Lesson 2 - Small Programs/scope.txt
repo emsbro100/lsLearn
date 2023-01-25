@@ -1,0 +1,31 @@
+Typical Variable Scope
+  Scope is the level at which a variable is defined, and consequentially the level(s) at which it can be accessed.
+  Generally, the rule is that variables can be accessed at levels lower than they were defined, but not levels higher.
+  - Local
+    - Any variable defined at the local level can be accessed at the local level.
+    - This means if the variable a is set to the value 5 on line 3, it can still be accessed on line 3000.
+  - Blocks
+    - Variables defined outside of blocks can be accessed and reassigned within blocks.
+      - If a variable is assigned outside of a block AND within a block, there will be "variable shadowing" which means the more local variable (within the block) will be referenced over the outside variable.
+    - Variables defined within blocks cannot be accessed outside of blocks.
+    - Blocks can be nested within blocks, and even nested blocks can access variables multiple block levels out.
+  - Methods
+      Methods have self-contained scope, meaning they put up a "wall" that prevents any variable from getting in or out of the method except for by argument.
+      - Variables defined outside of methods can NOT be accessed within methods
+      - Variables defined within methods can not be accessed outside of methods
+        - Because blocks can be created within methods, block rules apply within a method the same they would outside of a method, but blocks still cannot access variables outside of a method they're defined in.
+
+Constant Variable Scope
+  Constants are variables whose names are all uppercase.
+  - Unlike normal variables, constants have a lexical scope. This means that they can be defined or referenced anywhere inside or outside of a method or block.
+    They do not obey the rules that normal variables have to abide by. They can be accessed from within a method or defined within one and accessed outside.
+  - They are essentially global variables, but their values should never be altered or reassigned.
+
+Scope Complexities Within Methods
+  There are a few more complex things to note in order to build a more accurate and detailed mental model of variable scope:
+  - Method definition is when a method is defined using the def keyword.
+  - Method invocation is when a method is called, whether its a builtin method or user-defined method.
+  - Methods can be called with a block.
+    - Any method can be called with a block, but the block is only executed if the method is defined in a particular way.
+    - The block acts as an argument to the method in the same way that a local variable can be passed as an argument to the method.
+    - The yield keyword can be used to return to the block from the method, optionally with a value. This will return to the method again once the block has executed.
