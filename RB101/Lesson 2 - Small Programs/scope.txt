@@ -17,8 +17,9 @@ Typical Variable Scope
 
 Constant Variable Scope
   Constants are variables whose names are all uppercase.
-  - Unlike normal variables, constants have a lexical scope. This means that they can be defined or referenced anywhere inside or outside of a method or block.
-    They do not obey the rules that normal variables have to abide by. They can be accessed from within a method or defined within one and accessed outside.
+  - Unlike normal variables, constants have a lexical scope. This means that they can be referenced anywhere inside or outside of a method or block.
+    They do not obey the rules that normal variables have to abide by. They can be accessed from within a method or or block, or defined within a block and accessed locally.
+    It is important to note that they still cannot be defined within a method, though they can be accessed.
   - They are essentially global variables, but their values should never be altered or reassigned.
 
 Scope Complexities Within Methods
