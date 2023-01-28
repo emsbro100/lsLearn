@@ -7,7 +7,8 @@ Typical Variable Scope
   - Blocks
     - Variables defined outside of blocks can be accessed and reassigned within blocks.
       - If a variable is assigned outside of a block AND within a block, there will be "variable shadowing" which means the more local variable (within the block) will be referenced over the outside variable.
-    - Variables defined within blocks cannot be accessed outside of blocks.
+    - Variables defined within blocks usually cannot be accessed outside of blocks.
+      - The exception to this is while and until loops. Unlike normal blocks and loops, these do not have limited scope.
     - Blocks can be nested within blocks, and even nested blocks can access variables multiple block levels out.
   - Methods
       Methods have self-contained scope, meaning they put up a "wall" that prevents any variable from getting in or out of the method except for by argument.
