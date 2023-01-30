@@ -51,7 +51,7 @@ def get_choice
 end
 
 loop do
-  prompt("Rock paper scissors! First to three points wins is the grand winner.")
+  prompt("Rock paper scissors! First to three points is the grand winner.")
   player_score = 0
   computer_score = 0
 
