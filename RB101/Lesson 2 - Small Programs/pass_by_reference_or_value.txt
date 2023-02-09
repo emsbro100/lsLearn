@@ -1,0 +1,22 @@
+Pass by Reference
+  Pass by reference means that the variable passed to a method is passed as a reference to the variable.
+  - This means that if you modify the variable or reassign it within the method, it will affect the variable outside of the method.
+Pass by Value
+  Pass by value means that the variable passed to a method is passed in as a copy of the variable's value, not a reference to the variable itself.
+  - This means that if you modify or mutate the variable within the method it will not have any undesirable side effects since you are just modifying a cloned value.
+What does ruby pass?
+  In ruby, the way a variable is passed to a method may seem to align with one style of passing but after passing a different type of value may seem to align with the other.
+  - For instance:
+      When passing in an integer, it seems that ruby uses pass by value; because no matter what you do to it the outside variable referencing that integer is not modified.
+      In contrast, when you use pop on an array or concat on a string, it mutate the value of the variable that was passed as an argument to the method.
+  - Ruby's seemingly inconsistent style of passing arguments is because of it's more unique method of passing arguments: Pass by Reference Value.
+Pass by Reference Value/Pass by Value of Reference
+  Pass by reference value means that the variable passed to a method is passed as a copy of the reference to the object.
+  - Because of this, it may seem in a lot of cases that it is pass by reference since the value passed to a method is mutable.
+  - This isn't always the cause however, simply because some object classes are completely immutable. A few examples are integers, booleans, and nil.
+    - Integers are all predefined numbers. The number 2 will only ever be the number 2, so they have set memory addresses.
+      Because of this, integers are immutable. If you reassign an integer value to another integer or modify one, it just points to the predefined memory address for that integer.
+    - Booleans will also only ever be booleans. This is because true, false, and nil are all a part of their respective class: TrueClass, FalseClass, and NilClass.
+      These classes don't support any value other than true, false, and nil, and these each have predefined memory addresses like integers, so they will never be mutable.
+  - Because of these things, pass by reference value itself it pretty straightforward but the way ruby works may not seem as straightforward because of its immutability rules.
+  - It can also be noted that ruby is technically both pass by reference and pass by value: pass by value for immutable objects such as integers and booleans, pass by reference for others.

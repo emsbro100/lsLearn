@@ -2,4 +2,8 @@ def multiply(first_num, second_num)
   first_num * second_num
 end
 
-puts multiply(8, 5)
+def square(number)
+  multiply(number, number)
+end
+
+puts square(5)
