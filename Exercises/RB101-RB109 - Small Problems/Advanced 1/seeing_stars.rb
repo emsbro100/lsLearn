@@ -39,9 +39,8 @@ def print_row(points, size)
 end
 
 def star(size)
-  coordinates = [] # Giant list for coords [[x, y], [x, y]]
-  rows_coordinates = Array.new(size) {[]} # Nested lists for coords per-row
-  # Convert coordinates to rows_coordinates with [y].uniq.sort
+  coordinates = []
+  rows_coordinates = Array.new(size) {[]}
 
   lines = get_lines(size)
 

@@ -1,9 +1,6 @@
 #use File.open("file directory", "r") for readonly
 PATHS = [
   ".",
-  "../Downloads",
-  "../Documents/MQFiles/Caches/Website Archives 2 (1.18GB)"
-  #"../Documents/MQFiles/Caches/Laine (75MB)"
 ]
 
 def append_to_directory(dir)
@@ -135,7 +132,7 @@ def print_results(hash, paths=false) # Prints results to console nicely
   end
 end
 
-def search_single(term, wildcard=false, case_sensitive=false, recursive=false, path='ALL', paths=false, filetypes=['txt'])
+def search_single(term, wildcard=false, case_sensitive=false, recursive=false, path='.', paths=true, filetypes=['txt'])
   puts "=> Results for search term: #{term}"
   if path == 'ALL'
     result = search_all_paths(term, wildcard, case_sensitive, recursive, filetypes)
@@ -188,13 +185,11 @@ def help(params)
 
 end
 
-# puts valid_command?("search -rp --results 20 --filetypes txt json \"as\" .")
-search_single('p', true, false, true, 'ALL', true)
-# Dir["*"].each { |item| puts "#{item} (#{File.directory?(item)})"}
-# puts recursive_search('.', ['txt', 'exe'])
 
-# DONE: add case sensitivity option
-# DONE: HIGH PRIORITY: ADD RECURSIVE OPTION!
+search_single(term="shadow", wildcard=true, case_sensitive=false, recursive=true, path='ALL', paths=false, filetypes=['txt'])
+
+
+
 # improve print results and rest of program to print search term, and to print multiple terms for a search-multiple with hits for each
 
 # need to put args in program loop so methods override default valvues each loop so that each method has minimal args (2-3 max)

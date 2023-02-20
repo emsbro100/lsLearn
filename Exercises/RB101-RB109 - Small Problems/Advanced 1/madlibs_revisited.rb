@@ -1,3 +1,13 @@
+=begin
+
+Have preset lists of adjectives, nouns, verbs, and adverbs
+Take a text file as an input
+Parse each line of the text file, replacing each #{x} with a random word from
+  whatever type of word it should be
+Print the resulting lines to the console
+
+=end
+
 adjectives = %w(quick lazy sleepy ugly)
 nouns = %w(fox dog head leg)
 verbs = %w(jumps lifts bites licks)
