@@ -1,0 +1,11 @@
+When reading through code on an assessment, consider the scope of the question.
+With that in mind, answer the following questions about all of the code:
+
+- What is the type of action being performed (method call, block, conditional, etc..)?
+- What is the object that action is being performed on?
+- What is the side effect of that action (e.g. output or destructive action)?
+- What is the return value of that action?
+- Is the return value used by whatever instigated the action? 
+
+Answer all of these questions then decide which parts of your answer may be unnecessary to the context
+of the question, if any, and discord those. Then use the remaining information to formulate a proper answer.

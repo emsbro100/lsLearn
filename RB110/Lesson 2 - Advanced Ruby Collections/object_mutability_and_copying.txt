@@ -1,0 +1,16 @@
+Copying objects
+  Due to how references of objects work in ruby, sometimes you need to create a copy of an object in order to mutate the copy without mutating the original.
+  There are two ways of doing this:
+  - dup
+    Object#dup will create a duplicate of an object, with a different location in memory. This duplicate does not copy the frozen state of the object.
+  - clone
+    Object#clone will create a clone of an object, again with a different location in memory. This clone however WILL copy the frozen state of the object.
+  When objects are copied in ruby, regardless of whether dup or clone is used, a shallow copy is created.
+  This means that if you clone an array the array itself will be cloned but the elements within will reference the same elements as in the original.
+Freezing objects
+  You can make a mutable object such as a string immutable by calling Object#freeze on it.
+  This will lock the object from mutation until it is unfrozen.
+Deep cloning objects
+  There is no native way to create a deep clone of a collection such as a hash or array in ruby.
+  Because of this, you need to be careful about cloning collections unless you write your own implementation
+  or import someone else's implementation of deep cloning.
