@@ -88,19 +88,17 @@ def all_x_or_o?(row)
 end
 
 def board_lines
-  lines = { diagonal: [[1, 5, 9], [3, 5, 7]],
-            horizontal: [[1, 2, 3], [4, 5, 6], [7, 8, 9]],
-            vertical: [[1, 4, 7], [2, 5, 8], [3, 6, 9]] }
+  lines = [[1, 5, 9], [3, 5, 7], # Diagonal
+           [1, 2, 3], [4, 5, 6], [7, 8, 9], # Horizontal
+           [1, 4, 7], [2, 5, 8], [3, 6, 9]] # Vertical
 end
 
 def check_board(board)
   lines = board_lines
 
-  lines.values.each do |line_group| # Check for winners
-    line_group.each do |line|
-      if all_x_or_o?(positions_to_values(board, line))
-        return position_to_value(board, line[0]) 
-      end
+  lines.each do |line| # Check for winners
+    if all_x_or_o?(positions_to_values(board, line))
+      return position_to_value(board, line[0]) 
     end
   end
   return 'TIE' unless board.any? { |row| row.any?(' ') } # Check for tie
@@ -134,29 +132,55 @@ def ai_simple(board)
   empty_positions(board).sample
 end
 
-def ai_defensive(board)
+def find_at_risk_square(board, char)
   lines = board_lines
 
   lines.each do |line|
-    if line.any?(' ')
-      if line.count('X') == 5
-
+    line_values = positions_to_values(board, line)
+    if line_values.any?(' ')
+      if line_values.count(char) == 2
+        return line[line_values.find_index(' ')]
       end
     end
   end
 
+  nil
+end
+
+def ai_defensive(board)
+  defend_square = find_at_risk_square(board, 'X')
+  return defend_square if defend_square
+
+  ai_simple(board)
 end
 
 def ai_offensive(board)
+  attack_square = find_at_risk_square(board, 'O')
+  return attack_square if attack_square
 
+  defend_square = find_at_risk_square(board, 'X')
+  return defend_square if defend_square
+
+  return 5 if empty_positions(board).include?(5)
+
+  ai_simple(board)
 end
 
+# If player A can win in one move, their best move is that winning move
+# If one move player A makes will allow player B to win in one move but another will only allow player B to tie, the latter is the best move.
+
+# If player can win in one move, their best move is that winning move
+# If not: for each move, assess:
+#   whether the player can guaranteed lose (2+ loss moves)
+#   whether the player can lose
+#   whether the player can win
+#   whether the player can guaranteed win (2+ win moves)
 def ai_minimax(board)
 
 end
 
 def computer_turn(board)
-  position = ai_simple(board)
+  position = ai_offensive(board)
   update_board!(board, position, 'O')
 end
 
@@ -180,9 +204,8 @@ def print_result(winner)
   end
 end
 
-def play_game
+def play_game(turn)
   board = generate_board
-  turn = "player"
 
   display(board)
 
@@ -226,7 +249,16 @@ loop do
   scores = { player: 0, computer: 0 }
 
   loop do
-    case play_game
+    puts "Who should go first? (player, computer, random)"
+    first_turn = gets.chomp.downcase
+
+    while !%w(player computer random).include?(first_turn)
+      puts "Please enter a valid option!"
+      first_turn = gets.chomp.downcase
+    end
+    first_turn = %w(player computer).sample if first_turn == 'random'
+
+    case play_game(first_turn)
     when 'X' then scores[:player] += 1
     when 'O' then scores[:computer] += 1
     end
