@@ -44,6 +44,8 @@ def generate_board
 end
 
 def display(board)
+  Gem.win_platform? ? (system "cls") : (system "clear")
+
   board.each_index do |line|
     puts middle_line unless line == 0
     puts board[line].map { |char| " #{char} " }.join(LINE_VERTICAL)
@@ -74,10 +76,10 @@ end
 def check_board(board)
   lines = [[board[0][0], board[1][1], board[2][2]], # Diagonal lines
            [board[0][2], board[1][1], board[2][0]]]
-  lines.merge(board, board.transpose)
+  lines.concat(board, board.transpose)
 
   lines.each { |line| return line[0] if all_x_or_o(line) } # Check for winners
-  board.each { |row| return 'TIE' if row.any?(' ') } # Check for tie
+  return 'TIE' if !board.any? { |row| row.any?(' ') } # Check for tie
   nil # No winner or tie
 end
 
@@ -135,9 +137,9 @@ end
 
 RULES = [
   "Tic Tac Toe is a 2 player game played on a 3x3 board. Each player takes",
-  "a turn and marks a square on the board. First player to reach 3 squares in",
-  "a row, including diagonals, wins. If all 9 squares are marked and no player",
-  "has 3 square in a row, then the game is a tie."
+  "a turn and marks a square on the board. The first player to reach 3 squares",
+  "in a row, including diagonals, wins. If all 9 squares are marked and no",
+  "player has 3 squares in a row, then the game is a tie."
 ]
 
 puts "Welcome to Tic-Tac-Toe!"
@@ -145,6 +147,10 @@ puts "Welcome to Tic-Tac-Toe!"
 puts "Would you like to read the rules? (y/n)"
 if gets.chomp.downcase == 'y'
   RULES.each { |rule| puts rule.center(80) }
+
+  puts
+  puts "Press enter once you are ready to begin playing.".center(80)
+  gets
 end
 
 loop do
