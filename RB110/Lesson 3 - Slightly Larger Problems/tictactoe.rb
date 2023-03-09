@@ -166,15 +166,59 @@ def ai_offensive(board)
   ai_simple(board)
 end
 
-# If player A can win in one move, their best move is that winning move
-# If one move player A makes will allow player B to win in one move but another will only allow player B to tie, the latter is the best move.
+# Go through every possible play option and generate a tree of nodes based on
+# possible moves from both the player and the computer.
+# Consider using a recursive function to generate subnodes for each node.
+# The tree should have the full structure of possible moves with the only scored
+# nodes being the terminal nodes.
+def generate_nodes(board)
 
-# If player can win in one move, their best move is that winning move
-# If not: for each move, assess:
-#   whether the player can guaranteed lose (2+ loss moves)
-#   whether the player can lose
-#   whether the player can win
-#   whether the player can guaranteed win (2+ win moves)
+end
+
+# Use a heuristic evaluation function to evaluate the possible outcomes:
+# - Move scores increase or decrease by a power of 10 depending on the outcome
+# - If a guaranteed win within the current node is infinity, and a guaranteed
+#   loss within the current node is -infinity, then each will be evaluated
+#   as *10 or *-10 for the parent node.
+# - This way if a node has two subnodes that win its score is 100, whereas if a
+#   node has two subnodes that lose and one that win, its score is -10.
+# - If a node is a guarranteed win or loss within the current node it is to be
+#   considered a terminal node.
+def evaluate_node(subnodes)
+
+end
+
+# Generate node tree, then use minimax() to build values of the tree and find
+# the ideal move
+
+# Call minimax function within ai_minimax
+# Within the maximizing and minimizing branches:
+# - Call minimax for recursion to get to the bottom of the tree (terminal nodes)
+# - After minimax call (on the way out of the recursion, so it's bottom up) call
+#   evaluate_node to get the value of each node to build the options for the
+#   algorithm
+# - Determine the min/max of the given values and return that value recursively
+#   along with the move required to get that value
+# - Should end with the proper minimax, so as to minimize the maximum possible
+#   loss
+def minimax(node, depth, maximizing)
+  if depth == 0 # || node[value] == infinity/-infinity
+    return # node[value]
+  elsif maximizing
+    value = -Float::INFINITY
+    # For each subnode:
+      # value = `(minimax(child, depth - 1, FALSE).concat(value)).max` AKA max(value, minimax(child, depth − 1, FALSE))
+    return value
+  else # minimizing player
+    value = Float::INFINITY
+    # For each subnode:
+      # value = `(minimax(child, depth - 1, TRUE).concat(value)).max` AKA min(value, minimax(child, depth − 1, TRUE))
+    return value
+  end
+end
+
+# Call minimax with empty_positions(board) to properly index the algorithm so
+# that the returned value is the max and not the min
 def ai_minimax(board)
 
 end
