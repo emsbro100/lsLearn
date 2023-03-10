@@ -44,7 +44,7 @@ def generate_board
 end
 
 def display(board)
-  Gem.win_platform? ? (system "cls") : (system "clear")
+  # Gem.win_platform? ? (system "cls") : (system "clear")
 
   board.each_index do |line|
     puts middle_line unless line == 0
@@ -171,22 +171,110 @@ end
 # Consider using a recursive function to generate subnodes for each node.
 # The tree should have the full structure of possible moves with the only scored
 # nodes being the terminal nodes.
-def generate_nodes(board)
+# Data Structure:
+# - Use a hash/nested array structure for readability/clarity
+# - Each node has four values:
+#   - depth: the node's depth.
+#   - choice: the move that must be made to achieve the node as an outcome.
+#   - value: the value of that node, based on the evaluation of its subnodes.
+#            this will have a value of nil until the node is evaluated from the
+#            bottom up.
+#   - subtree: an array containing the subnodes of the current node. this will 
+#              be empty if the current node is a terminal node.
 
+def clone_board(board)
+  Marshal.load(Marshal.dump(board))
 end
 
+=begin
+1. Define the tree structure for the current node
+2. Check which positions (subnodes) will be added, add them to an array
+3. For each position to be added:
+   - Skip the position if the node is terminal
+   - Generate a modified game board with that position filled
+   - Pass that modified board to the generation method for recursion
+   - Append the newly generated subnode to the subtree of the current node
+4. Modify the score of the node if the node is terminal
+5. Return the node
+=end
+def generate_nodes(board, choice = nil, depth = 0, user = 'O', user_turn = true)
+  tree = { depth: depth, choice: choice, score: nil, subtree: [] }
+  positions_arr = empty_positions(board)
+
+  opponent = user == 'O' ? 'X' : 'O'
+  char = user_turn ? user : opponent
+
+  loop do
+    break if positions_arr.empty? || check_board(board) # Break if terminal node
+    current_pos = positions_arr.pop
+
+    board_clone = clone_board(board)
+    update_board!(board_clone, current_pos, char)
+    
+    subtree_node = generate_nodes(board_clone, current_pos, depth + 1, user, (!user_turn))
+    tree[:subtree].push(subtree_node)
+  end
+
+  case check_board(board)
+  when user then tree[:score] = 1
+  when 'X' || 'O' then tree[:score] = -1
+  when 'TIE' then tree[:score] = 0
+  end
+
+  tree
+end
+
+# require 'Time'
+# new_board = generate_board
+# t1 = Time.now
+# full_nodes = generate_nodes(new_board)
+# t2 = Time.now
+# puts "Generated full node tree in #{t2 - t1} seconds."
+
+# puts full_nodes[:subtree][0]
+# full_nodes[:subtree].each { |node| p node }
 # Use a heuristic evaluation function to evaluate the possible outcomes:
 # - Move scores increase or decrease by a power of 10 depending on the outcome
 # - If a guaranteed win within the current node is infinity, and a guaranteed
 #   loss within the current node is -infinity, then each will be evaluated
-#   as *10 or *-10 for the parent node.
-# - This way if a node has two subnodes that win its score is 100, whereas if a
-#   node has two subnodes that lose and one that win, its score is -10.
-# - If a node is a guarranteed win or loss within the current node it is to be
-#   considered a terminal node.
-def evaluate_node(subnodes)
+#   as +1 or -1 for the parent node.
+# - This way if a node has two subnodes that win its score is 2, whereas if a
+#   node has two subnodes that lose and one that win, its score is -1.
+# - If a node is a guaranteed win or loss within the current node it is to be
+#   considered a terminal node and should be given the proper sign (inf/-inf)
 
+# While the node has unscored children:
+# - Call the function on it recursively
+# - set `score` to 0
+# - add each subnode's score to an array `scores`
+# - replace infinity with 1 in scores, and -inf with -1
+# - reduce the list by addition, assign that value to score
+# - assign node[:score] to score's value
+def evaluate_node_tree(tree)
+  scores = []
+
+  tree[:subtree].each do |subnode|
+    evaluate_node_tree(subnode) if subnode[:score] == nil
+    scores << subnode[:score]
+  end
+
+  tree[:score] = scores.reduce(:+)
 end
+
+board = generate_board
+update_board!(board, 1, 'O')
+update_board!(board, 2, 'O')
+update_board!(board, 3, 'X')
+update_board!(board, 5, 'X')
+
+update_board!(board, 4, 'X')
+update_board!(board, 6, 'O')
+
+nodes = generate_nodes(board)
+
+nodes[:subtree].each { |node| p node }
+evaluate_node_tree(nodes)
+nodes[:subtree].each { |node| p node }
 
 # Generate node tree, then use minimax() to build values of the tree and find
 # the ideal move
@@ -202,6 +290,7 @@ end
 # - Should end with the proper minimax, so as to minimize the maximum possible
 #   loss
 def minimax(node, depth, maximizing)
+  # Make depth = tree height in generation, then use that to stop recursion
   if depth == 0 # || node[value] == infinity/-infinity
     return # node[value]
   elsif maximizing
@@ -278,53 +367,53 @@ RULES = [
   "The grand winner is the first to 5 wins."
 ]
 
-puts "Welcome to Tic-Tac-Toe!"
+# puts "Welcome to Tic-Tac-Toe!"
 
-puts "Would you like to read the rules? (y/n)"
-if gets.chomp.downcase == 'y'
-  RULES.each { |rule| puts rule.center(80) }
+# puts "Would you like to read the rules? (y/n)"
+# if gets.chomp.downcase == 'y'
+#   RULES.each { |rule| puts rule.center(80) }
 
-  puts
-  puts "Press enter once you are ready to begin playing.".center(80)
-  gets
-end
+#   puts
+#   puts "Press enter once you are ready to begin playing.".center(80)
+#   gets
+# end
 
-loop do
-  scores = { player: 0, computer: 0 }
+# loop do
+#   scores = { player: 0, computer: 0 }
 
-  loop do
-    puts "Who should go first? (player, computer, random)"
-    first_turn = gets.chomp.downcase
+#   loop do
+#     puts "Who should go first? (player, computer, random)"
+#     first_turn = gets.chomp.downcase
 
-    while !%w(player computer random).include?(first_turn)
-      puts "Please enter a valid option!"
-      first_turn = gets.chomp.downcase
-    end
-    first_turn = %w(player computer).sample if first_turn == 'random'
+#     while !%w(player computer random).include?(first_turn)
+#       puts "Please enter a valid option!"
+#       first_turn = gets.chomp.downcase
+#     end
+#     first_turn = %w(player computer).sample if first_turn == 'random'
 
-    case play_game(first_turn)
-    when 'X' then scores[:player] += 1
-    when 'O' then scores[:computer] += 1
-    end
+#     case play_game(first_turn)
+#     when 'X' then scores[:player] += 1
+#     when 'O' then scores[:computer] += 1
+#     end
 
-    puts "Player's score: #{scores[:player]}, Computer's score: "\
-         "#{scores[:computer]}"
+#     puts "Player's score: #{scores[:player]}, Computer's score: "\
+#          "#{scores[:computer]}"
 
-    case
-    when scores[:player] == 5
-      puts "You are the grand winner! Good job!"
-      break
-    when scores[:computer] == 5
-      puts "The computer is the grand winner! Better luck next time!"
-      break
-    end
+#     case
+#     when scores[:player] == 5
+#       puts "You are the grand winner! Good job!"
+#       break
+#     when scores[:computer] == 5
+#       puts "The computer is the grand winner! Better luck next time!"
+#       break
+#     end
     
-    puts "Press enter to continue."
-    gets
-  end
+#     puts "Press enter to continue."
+#     gets
+#   end
 
-  puts "Would you like to play again? (y/n)"
-  break unless gets.chomp.downcase == 'y'
-end
+#   puts "Would you like to play again? (y/n)"
+#   break unless gets.chomp.downcase == 'y'
+# end
 
-puts "Thank you for playing!"
+# puts "Thank you for playing!"
