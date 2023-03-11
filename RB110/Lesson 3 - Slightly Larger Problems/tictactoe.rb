@@ -1,74 +1,52 @@
 LINE_HORIZONTAL = "\u{2500}"
 LINE_VERTICAL = "\u{2502}"
 LINE_PLUS = "\u{253c}"
-
-def middle_line
-  Array.new(3) { LINE_HORIZONTAL * 3 }.join(LINE_PLUS)
-end
+MIDDLE_LINE = Array.new(3) { LINE_HORIZONTAL * 3 }.join(LINE_PLUS)
+BOARD_LINES = [[1, 5, 9], [3, 5, 7], # Diagonal
+               [1, 2, 3], [4, 5, 6], [7, 8, 9], # Horizontal
+               [1, 4, 7], [2, 5, 8], [3, 6, 9]] # Vertical
 
 def generate_board
-  Array.new(3) { Array.new(3) { ' ' } }
+  (1..9).each_with_object({}) { |n, obj| obj[n] = ' ' }
 end
 
 def display(board)
   Gem.win_platform? ? (system "cls") : (system "clear")
 
-  board.each_index do |line|
-    puts middle_line unless line == 0
-    puts board[line].map { |char| " #{char} " }.join(LINE_VERTICAL)
+  board_arr = []
+  board.values.each_slice(3) { |slice| board_arr << slice }
+
+  board_arr.each_index do |line|
+    puts MIDDLE_LINE unless line == 0
+    puts board_arr[line].map { |char| " #{char} " }.join(LINE_VERTICAL)
   end
-end
-
-def position_index(position)
-  (position - 1).divmod(3)
-end
-
-def position_to_value(board, position)
-  index = position_index(position)
-  board[index[0]][index[1]]
-end
-
-def positions_to_values(board, array)
-  new_arr = []
-  array.each do |value|
-    index = position_index(value)
-    new_arr << board[index[0]][index[1]]
-  end
-  new_arr
 end
 
 def empty_positions(board)
   empty = []
-  board.each_with_index do |row, y|
-    row.each_with_index { |value, x| empty << (y * 3) + x + 1 if value == ' ' }
+  board.each do |k, v|
+    empty << k if v == ' '
   end
   empty
 end
 
 def update_board!(board, position, char)
-  pos_index = position_index(position)
-  board[pos_index[0]][pos_index[1]] = char
+  board[position] = char
 end
 
-def all_x_or_o?(row)
-  row.all?('X') || row.all?('O')
-end
-
-def board_lines
-  lines = [[1, 5, 9], [3, 5, 7], # Diagonal
-           [1, 2, 3], [4, 5, 6], [7, 8, 9], # Horizontal
-           [1, 4, 7], [2, 5, 8], [3, 6, 9]] # Vertical
+def all_x_or_o?(board, line)
+  line.all? { |pos| board[pos] == 'X' } || line.all? { |pos| board[pos] == 'O' }
 end
 
 def check_board(board)
-  lines = board_lines
-
-  lines.each do |line| # Check for winners
-    if all_x_or_o?(positions_to_values(board, line))
-      return position_to_value(board, line[0])
+  BOARD_LINES.each do |line| # Check for winners
+    if all_x_or_o?(board, line)
+      return board[line[0]]
     end
   end
-  return 'TIE' unless board.any? { |row| row.any?(' ') } # Check for tie
+
+  return 'TIE' unless board.any? { |_, v| v == ' ' } # Check for tie
+
   nil # No winner or tie
 end
 
@@ -77,7 +55,7 @@ def joinor(arr, delimiter=', ', final_delimiter='or')
 
   (arr.size - 1).times do |num|
     if arr.size == 2
-      joined_str << " #{final_delimiter} "
+      joined_str += " #{final_delimiter} "
     elsif num >= arr.size - 2
       joined_str << "#{delimiter}#{final_delimiter} "
     else
@@ -89,25 +67,84 @@ def joinor(arr, delimiter=', ', final_delimiter='or')
   joined_str
 end
 
-def player_turn(board)
-  puts "Please enter the number of the position you want to put an X in:"
-  puts "(#{joinor(empty_positions(board))})"
-  update_board!(board, get_position(empty_positions(board)), 'X')
-end
-
 def find_at_risk_square(board, char)
-  lines = board_lines
-
-  lines.each do |line|
-    line_values = positions_to_values(board, line)
-    if line_values.any?(' ')
-      if line_values.count(char) == 2
-        return line[line_values.find_index(' ')]
-      end
+  BOARD_LINES.each do |line| # Check for winners
+    values = line.each_with_object([]) { |pos, obj| obj << board[pos] }
+    if values.count(char) == 2 && values.include?(' ')
+      return line[values.find_index(' ')]
     end
   end
 
   nil
+end
+
+def deep_clone(value) # From Evan Pon on stackoverflow
+  if value.is_a?(Hash)
+    result = value.clone
+    value.each { |k, v| result[k] = deep_clone(v) }
+    result
+  elsif value.is_a?(Array)
+    result = value.clone
+    result.clear
+    value.each { |v| result << deep_clone(v) }
+    result
+  else
+    value
+  end
+end
+
+def score_node(board, winning_char)
+  case check_board(board)
+  when winning_char then 1
+  when 'X' || 'O' then -1
+  when 'TIE' then 0
+  end
+end
+
+def generate_nodes(board, choice = nil, user = 'O', user_turn = true)
+  tree = { choice: choice, score: nil, subtree: [] }
+  positions_arr = empty_positions(board)
+
+  opponent = user == 'O' ? 'X' : 'O'
+  char = user_turn ? user : opponent
+
+  loop do
+    break if positions_arr.empty? || check_board(board) # Break if terminal node
+
+    pos = positions_arr.pop
+
+    board_clone = deep_clone(board)
+    update_board!(board_clone, pos, char)
+
+    subtree_node = generate_nodes(board_clone, pos, user, !user_turn)
+    tree[:subtree].push(subtree_node)
+  end
+
+  tree[:score] = score_node(board, user)
+
+  tree
+end
+
+def minimax!(node, maximizing)
+  return node[:score] if node[:score] # Return node value if terminal node
+
+  if maximizing
+    value = -Float::INFINITY
+
+    node[:subtree].each do |subnode|
+      subnode[:score] = minimax!(subnode, false)
+      value = subnode[:score] if subnode[:score] > value
+    end
+  else # minimizing player
+    value = Float::INFINITY
+
+    node[:subtree].each do |subnode|
+      subnode[:score] = minimax!(subnode, true)
+      value = subnode[:score] if subnode[:score] < value
+    end
+  end
+
+  value
 end
 
 def ai_simple(board)
@@ -135,6 +172,7 @@ end
 
 def ai_minimax(board)
   node_tree = generate_nodes(board)
+
   score = minimax!(node_tree, true)
 
   node_tree[:subtree].each do |node|
@@ -142,57 +180,10 @@ def ai_minimax(board)
   end
 end
 
-def clone_board(board)
-  Marshal.load(Marshal.dump(board))
-end
-
-def generate_nodes(board, choice = nil, depth = 0, user = 'O', user_turn = true)
-  tree = { depth: depth, choice: choice, score: nil, subtree: [] }
-  positions_arr = empty_positions(board)
-
-  opponent = user == 'O' ? 'X' : 'O'
-  char = user_turn ? user : opponent
-
-  loop do
-    break if positions_arr.empty? || check_board(board) # Break if terminal node
-    pos = positions_arr.pop
-
-    board_clone = clone_board(board)
-    update_board!(board_clone, pos, char)
-
-    subtree_node = generate_nodes(board_clone, pos, depth + 1, user, !user_turn)
-    tree[:subtree].push(subtree_node)
-  end
-
-  case check_board(board)
-  when user then tree[:score] = 1
-  when 'X' || 'O' then tree[:score] = -1
-  when 'TIE' then tree[:score] = 0
-  end
-
-  tree
-end
-
-def minimax!(node, maximizing)
-  return node[:score] if node[:score] # Return node value if terminal node
-
-  if maximizing
-    value = -(Float::INFINITY)
-
-    node[:subtree].each do |subnode|
-      subnode[:score] = minimax!(subnode, false)
-      value = subnode[:score] if subnode[:score] > value
-    end
-  else # minimizing player
-    value = Float::INFINITY
-
-    node[:subtree].each do |subnode|
-      subnode[:score] = minimax!(subnode, true)
-      value = subnode[:score] if subnode[:score] < value
-    end
-  end
-
-  value
+def player_turn(board)
+  puts "Please enter the number of the position you want to put an X in:"
+  puts "(#{joinor(empty_positions(board))})"
+  update_board!(board, get_position(empty_positions(board)), 'X')
 end
 
 def computer_turn(board)
@@ -207,6 +198,17 @@ def get_position(valid_positions)
     position = gets.chomp.to_i
   end
   position
+end
+
+def get_option(options)
+  input = gets.chomp.downcase
+
+  loop do
+    options.each { |option| return option if option[0] == input[0] }
+
+    puts "Please enter a valid option!"
+    input = gets.chomp.downcase
+  end
 end
 
 def print_result(winner)
@@ -266,12 +268,7 @@ loop do
 
   loop do
     puts "Who should go first? (player, computer, random)"
-    first_turn = gets.chomp.downcase
-
-    while !%w(player computer random).include?(first_turn)
-      puts "Please enter a valid option!"
-      first_turn = gets.chomp.downcase
-    end
+    first_turn = get_option(%w(player computer random))
     first_turn = %w(player computer).sample if first_turn == 'random'
 
     case play_game(first_turn)
