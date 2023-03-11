@@ -44,7 +44,7 @@ def generate_board
 end
 
 def display(board)
-  # Gem.win_platform? ? (system "cls") : (system "clear")
+  Gem.win_platform? ? (system "cls") : (system "clear")
 
   board.each_index do |line|
     puts middle_line unless line == 0
@@ -250,16 +250,6 @@ end
 # - replace infinity with 1 in scores, and -inf with -1
 # - reduce the list by addition, assign that value to score
 # - assign node[:score] to score's value
-def evaluate_node_tree(tree)
-  scores = []
-
-  tree[:subtree].each do |subnode|
-    evaluate_node_tree(subnode) if subnode[:score] == nil
-    scores << subnode[:score]
-  end
-
-  tree[:score] = scores.reduce(:+)
-end
 
 board = generate_board
 update_board!(board, 1, 'O')
@@ -272,9 +262,7 @@ update_board!(board, 6, 'O')
 
 nodes = generate_nodes(board)
 
-nodes[:subtree].each { |node| p node }
-evaluate_node_tree(nodes)
-nodes[:subtree].each { |node| p node }
+# nodes[:subtree].each { |node| p node }
 
 # Generate node tree, then use minimax() to build values of the tree and find
 # the ideal move
@@ -291,29 +279,50 @@ nodes[:subtree].each { |node| p node }
 #   loss
 def minimax(node, depth, maximizing)
   # Make depth = tree height in generation, then use that to stop recursion
-  if depth == 0 # || node[value] == infinity/-infinity
-    return # node[value]
+  if node[:value] != nil
+    return node[:value]
+  # if depth == 0 # || node[value] == infinity/-infinity
+  #   return # node[value]
   elsif maximizing
-    value = -Float::INFINITY
+    value = -(Float::INFINITY)
+    node[:subtree].each do |subnode|
+      subnode_score = minimax(subnode, depth + 1, false)
+      subnode[:score] = subnode_score unless subnode[:score]
+      value = subnode[:score] if subnode[:score] > value
+    end
     # For each subnode:
       # value = `(minimax(child, depth - 1, FALSE).concat(value)).max` AKA max(value, minimax(child, depth − 1, FALSE))
     return value
   else # minimizing player
     value = Float::INFINITY
+    node[:subtree].each do |subnode|
+      subnode_score = minimax(subnode, depth + 1, true)
+      subnode[:score] = subnode_score unless subnode[:score]
+      value = subnode[:score] if subnode[:score] < value
+    end
     # For each subnode:
       # value = `(minimax(child, depth - 1, TRUE).concat(value)).max` AKA min(value, minimax(child, depth − 1, TRUE))
     return value
   end
 end
 
+# minimax(nodes, 0, true)
+# nodes[:subtree].each { |node| puts node }
+# p nodes
+
 # Call minimax with empty_positions(board) to properly index the algorithm so
 # that the returned value is the max and not the min
 def ai_minimax(board)
-
+  node_tree = generate_nodes(board)
+  minimax(node_tree, 0, true)
+  scores_moves = []
+  node_tree[:subtree].size.times { |idx| scores_moves << [node_tree[:subtree][idx][:score], node_tree[:subtree][idx][:choice]] }
+  scores_moves.sort_by! { |pair| pair[0] }.reverse!
+  scores_moves[0][1]
 end
 
 def computer_turn(board)
-  position = ai_offensive(board)
+  position = ai_minimax(board)
   update_board!(board, position, 'O')
 end
 
@@ -367,53 +376,53 @@ RULES = [
   "The grand winner is the first to 5 wins."
 ]
 
-# puts "Welcome to Tic-Tac-Toe!"
+puts "Welcome to Tic-Tac-Toe!"
 
-# puts "Would you like to read the rules? (y/n)"
-# if gets.chomp.downcase == 'y'
-#   RULES.each { |rule| puts rule.center(80) }
+puts "Would you like to read the rules? (y/n)"
+if gets.chomp.downcase == 'y'
+  RULES.each { |rule| puts rule.center(80) }
 
-#   puts
-#   puts "Press enter once you are ready to begin playing.".center(80)
-#   gets
-# end
+  puts
+  puts "Press enter once you are ready to begin playing.".center(80)
+  gets
+end
 
-# loop do
-#   scores = { player: 0, computer: 0 }
+loop do
+  scores = { player: 0, computer: 0 }
 
-#   loop do
-#     puts "Who should go first? (player, computer, random)"
-#     first_turn = gets.chomp.downcase
+  loop do
+    puts "Who should go first? (player, computer, random)"
+    first_turn = gets.chomp.downcase
 
-#     while !%w(player computer random).include?(first_turn)
-#       puts "Please enter a valid option!"
-#       first_turn = gets.chomp.downcase
-#     end
-#     first_turn = %w(player computer).sample if first_turn == 'random'
+    while !%w(player computer random).include?(first_turn)
+      puts "Please enter a valid option!"
+      first_turn = gets.chomp.downcase
+    end
+    first_turn = %w(player computer).sample if first_turn == 'random'
 
-#     case play_game(first_turn)
-#     when 'X' then scores[:player] += 1
-#     when 'O' then scores[:computer] += 1
-#     end
+    case play_game(first_turn)
+    when 'X' then scores[:player] += 1
+    when 'O' then scores[:computer] += 1
+    end
 
-#     puts "Player's score: #{scores[:player]}, Computer's score: "\
-#          "#{scores[:computer]}"
+    puts "Player's score: #{scores[:player]}, Computer's score: "\
+         "#{scores[:computer]}"
 
-#     case
-#     when scores[:player] == 5
-#       puts "You are the grand winner! Good job!"
-#       break
-#     when scores[:computer] == 5
-#       puts "The computer is the grand winner! Better luck next time!"
-#       break
-#     end
+    case
+    when scores[:player] == 5
+      puts "You are the grand winner! Good job!"
+      break
+    when scores[:computer] == 5
+      puts "The computer is the grand winner! Better luck next time!"
+      break
+    end
     
-#     puts "Press enter to continue."
-#     gets
-#   end
+    puts "Press enter to continue."
+    gets
+  end
 
-#   puts "Would you like to play again? (y/n)"
-#   break unless gets.chomp.downcase == 'y'
-# end
+  puts "Would you like to play again? (y/n)"
+  break unless gets.chomp.downcase == 'y'
+end
 
-# puts "Thank you for playing!"
+puts "Thank you for playing!"
