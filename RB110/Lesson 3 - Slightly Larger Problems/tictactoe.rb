@@ -6,20 +6,40 @@ BOARD_LINES = [[1, 5, 9], [3, 5, 7], # Diagonal
                [1, 2, 3], [4, 5, 6], [7, 8, 9], # Horizontal
                [1, 4, 7], [2, 5, 8], [3, 6, 9]] # Vertical
 
+$statistics = false
+
 def generate_board
   (1..9).each_with_object({}) { |n, obj| obj[n] = ' ' }
+end
+
+def append_number_grid!(display_lines)
+  [[1, 2, 3], [4, 5, 6], [7, 8, 9]].each_with_index do |nums, idx|
+    display_lines[idx] += "  #{nums.join(' ')}"
+  end
 end
 
 def display(board)
   Gem.win_platform? ? (system "cls") : (system "clear")
 
+  if $statistics
+    puts "Total nodes: #{$total_nodes}"
+    puts "Time to calculate all nodes and move: #{$move_time} seconds."
+    $total_nodes = 0
+  end
+
   board_arr = []
   board.values.each_slice(3) { |slice| board_arr << slice }
 
+  lines = []
+
   board_arr.each_index do |line|
-    puts MIDDLE_LINE unless line == 0
-    puts board_arr[line].map { |char| " #{char} " }.join(LINE_VERTICAL)
+    lines << MIDDLE_LINE unless line == 0
+    lines << board_arr[line].map { |char| " #{char} " }.join(LINE_VERTICAL)
   end
+
+  append_number_grid!(lines)
+
+  lines.each { |line| puts line }
 end
 
 def empty_positions(board)
@@ -101,7 +121,14 @@ def score_node(board, winning_char)
   end
 end
 
+if $statistics
+  $total_nodes = 0
+  $move_time = 0
+  require 'Time'
+end
+
 def generate_nodes(board, choice = nil, user = 'O', user_turn = true)
+  $total_nodes += 1 if $statistics
   tree = { choice: choice, score: nil, subtree: [] }
   positions_arr = empty_positions(board)
 
@@ -171,9 +198,12 @@ def ai_offensive(board)
 end
 
 def ai_minimax(board)
+  t1 = Time.now
   node_tree = generate_nodes(board)
 
   score = minimax!(node_tree, true)
+  t2 = Time.now
+  $move_time = t2 - t1
 
   node_tree[:subtree].each do |node|
     return node[:choice] if node[:score] == score
@@ -243,6 +273,16 @@ def play_game(turn)
 
   check_board(board)
 end
+
+# Updates to make based on code review:
+# - Add a smaller grid to the right of the play grid to represent which number
+#   is which square DONE
+# - Refactor the code so the case statement is less ambiguous and the outputs of
+#   methods are more clear/self-contained
+# - Refactor the main loop and play_game so that more of the high level game
+#   logic is contained in the main loop and more of the low level logic is
+#   either extracted to more methods or contained in play_game.
+# - Create a method for displaying the grand winner based on scores
 
 RULES = [
   "Tic Tac Toe is a 2 player game played on a 3x3 board. Each player takes",
