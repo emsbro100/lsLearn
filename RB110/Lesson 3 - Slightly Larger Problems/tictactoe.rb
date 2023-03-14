@@ -252,7 +252,40 @@ def print_result(winner)
   end
 end
 
-def play_game(turn)
+def print_scores(player_score, computer_score)
+  puts "Player's score: #{player_score}, Computer's score: "\
+       "#{computer_score}"
+end
+
+def print_grand_winner(scores)
+  if scores[:player] == 5
+    puts "You are the grand winner! Good job!"
+  else
+    puts "The computer is the grand winner! Better luck next time!"
+  end
+end
+
+def print_rules
+  RULES.each { |rule| puts rule.center(80) }
+
+  puts
+  puts "Press enter once you are ready to begin playing.".center(80)
+  gets
+end
+
+def determine_winner(board_winner)
+  case board_winner
+  when 'X' then 'player'
+  when 'O' then 'computer'
+  else 'none'
+  end
+end
+
+def grand_winner?(scores)
+  scores[:player] == 5 || scores[:computer] == 5
+end
+
+def game_loop(turn)
   board = generate_board
 
   display(board)
@@ -271,18 +304,8 @@ def play_game(turn)
   display(board) if turn == "computer"
   print_result(check_board(board))
 
-  check_board(board)
+  determine_winner(check_board(board))
 end
-
-# Updates to make based on code review:
-# - Add a smaller grid to the right of the play grid to represent which number
-#   is which square DONE
-# - Refactor the code so the case statement is less ambiguous and the outputs of
-#   methods are more clear/self-contained
-# - Refactor the main loop and play_game so that more of the high level game
-#   logic is contained in the main loop and more of the low level logic is
-#   either extracted to more methods or contained in play_game.
-# - Create a method for displaying the grand winner based on scores
 
 RULES = [
   "Tic Tac Toe is a 2 player game played on a 3x3 board. Each player takes",
@@ -295,13 +318,7 @@ RULES = [
 puts "Welcome to Tic-Tac-Toe!"
 
 puts "Would you like to read the rules? (y/n)"
-if gets.chomp.downcase == 'y'
-  RULES.each { |rule| puts rule.center(80) }
-
-  puts
-  puts "Press enter once you are ready to begin playing.".center(80)
-  gets
-end
+print_rules if gets.chomp.downcase.start_with?('y')
 
 loop do
   scores = { player: 0, computer: 0 }
@@ -311,19 +328,16 @@ loop do
     first_turn = get_option(%w(player computer random))
     first_turn = %w(player computer).sample if first_turn == 'random'
 
-    case play_game(first_turn)
-    when 'X' then scores[:player] += 1
-    when 'O' then scores[:computer] += 1
+    winner = game_loop(first_turn)
+    case winner
+    when 'player' then scores[:player] += 1
+    when 'computer' then scores[:computer] += 1
     end
 
-    puts "Player's score: #{scores[:player]}, Computer's score: "\
-         "#{scores[:computer]}"
+    print_scores(scores[:player], scores[:computer])
 
-    if scores[:player] == 5
-      puts "You are the grand winner! Good job!"
-      break
-    elsif scores[:computer] == 5
-      puts "The computer is the grand winner! Better luck next time!"
+    if grand_winner?(scores)
+      print_grand_winner(scores)
       break
     end
 
@@ -332,7 +346,7 @@ loop do
   end
 
   puts "Would you like to play again? (y/n)"
-  break unless gets.chomp.downcase == 'y'
+  break unless gets.chomp.downcase.start_with?('y')
 end
 
 puts "Thank you for playing!"
