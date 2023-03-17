@@ -1,7 +1,7 @@
+WIN_CONDITION = 21
+DEALER_MIN = 17
 CARD_BACK = "\u{1f0a0}"
-
 CARD_BLOCK_PREFIX = 0x1f000
-
 CARDS = {
   value_names: {
     0 => 'Ace', 1 => 'Two', 2 => 'Three', 3 => 'Four', 4 => 'Five', 5 => 'Six',
@@ -15,12 +15,11 @@ CARDS = {
     clubs: { name: 'Clubs', prefix: 0xD0 }
   }
 }
-
 END_TEXTS = {
-  'pbust' => "Bust! Better luck next time.",
-  'dbust' => "Dealer bust! You win!",
-  '21' => "21! Good job!",
-  'd21' => "Dealer 21! Better luck next time.",
+  :pbust => "Bust! Better luck next time.",
+  :dbust => "Dealer bust! You win!",
+  :'21' => "21! Good job!",
+  :d21 => "Dealer 21! Better luck next time.",
   1 => "You won! Good job!",
   0 => "Tie! The dealers hand is equal to yours.",
   -1 => "You lose! Better luck next time."
@@ -83,7 +82,7 @@ def hand_value(hand)
   hand_values = hand.map { |card| card[:value] }
 
   while hand_values.include?(1)
-    if hand_values.sum + 10 <= 21
+    if hand_values.sum + 10 <= WIN_CONDITION
       hand_values[hand_values.find_index(1)] = 11
     else
       break
@@ -135,13 +134,13 @@ def player_turn(deck, player_hand, dealer_hand)
     break if choice == 'stay'
 
     player_hand.concat(deal!(1, deck))
-    break if hand_value(player_hand) >= 21
+    break if hand_value(player_hand) >= WIN_CONDITION
   end
 end
 
 def dealer_turn(deck, dealer_hand)
   loop do
-    break if hand_value(dealer_hand) >= 17
+    break if hand_value(dealer_hand) >= DEALER_MIN
     dealer_hand.concat(deal!(1, deck))
   end
 end
@@ -158,20 +157,42 @@ def display_hands(player_hand, dealer_hand, hidden = true)
   puts
 end
 
+def print_scores(player_score, computer_score)
+  puts "Player's score: #{player_score}, Dealer's score: "\
+       "#{computer_score}"
+end
+
 def compare_hands(player_hand, dealer_hand)
-  player_value = hand_value(player_hand)
-  dealer_value = hand_value(dealer_hand)
+  player_total = hand_value(player_hand)
+  dealer_total = hand_value(dealer_hand)
 
-  return 'pbust' if player_value > 21
-  return '21' if player_value == 21 && dealer_value != 21
-  return 'dbust' if dealer_value > 21
-  return 'd21' if dealer_value == 21 && player_value != 21
+  return :pbust if player_total > WIN_CONDITION
+  return :'21' if player_total == WIN_CONDITION && dealer_total != WIN_CONDITION
+  return :dbust if dealer_total > WIN_CONDITION
+  return :d21 if dealer_total == WIN_CONDITION && player_total != WIN_CONDITION
 
-  player_value <=> dealer_value
+  player_total <=> dealer_total
+end
+
+def check_winner(outcome)
+  return :player if [:'21', :dbust, 1].include?(outcome)
+  return :dealer if [:d21, :pbust, -1].include?(outcome)
 end
 
 def print_winner(outcome)
   puts END_TEXTS[outcome]
+end
+
+def winner?(scores)
+  scores[:player] == 5 || scores[:dealer] == 5
+end
+
+def print_grand_winner(scores)
+  if scores[:player] == 5
+    puts "You are the grand winner! Good job!"
+  else
+    puts "The dealer is the grand winner! Better luck next time!"
+  end
 end
 
 puts "Welcome to Twenty-One!"
@@ -179,17 +200,37 @@ puts "Press enter to begin."
 gets
 
 loop do
-  deck = new_deck
+  scores = { player: 0, dealer: 0 }
 
-  player_hand = deal!(2, deck)
-  dealer_hand = deal!(2, deck)
+  loop do
+    break if winner?(scores)
 
-  player_turn(deck, player_hand, dealer_hand) if hand_value(player_hand) != 21
+    deck = new_deck
 
-  dealer_turn(deck, dealer_hand) if hand_value(player_hand) < 21
+    player_hand = deal!(2, deck)
+    dealer_hand = deal!(2, deck)
 
-  display_hands(player_hand, dealer_hand, false)
-  print_winner(compare_hands(player_hand, dealer_hand))
+    if hand_value(player_hand) != WIN_CONDITION
+      player_turn(deck, player_hand, dealer_hand)
+    end
+
+    dealer_turn(deck, dealer_hand) if hand_value(player_hand) < WIN_CONDITION
+
+    outcome = compare_hands(player_hand, dealer_hand)
+    case check_winner(outcome)
+    when :player then scores[:player] += 1
+    when :dealer then scores[:dealer] += 1
+    end
+
+    display_hands(player_hand, dealer_hand, false)
+    print_winner(outcome)
+    print_scores(scores[:player], scores[:dealer])
+
+    puts "Press enter to continue."
+    gets
+  end
+
+  print_grand_winner(scores)
 
   puts "Would you like to play again? (y/n)"
   break unless gets.chomp.downcase.start_with?('y')
