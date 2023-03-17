@@ -16,6 +16,16 @@ CARDS = {
   }
 }
 
+END_TEXTS = {
+  'pbust' => "Bust! Better luck next time.",
+  'dbust' => "Dealer bust! You win!",
+  '21' => "21! Good job!",
+  'd21' => "Dealer 21! Better luck next time.",
+  1 => "You won! Good job!",
+  0 => "Tie! The dealers hand is equal to yours.",
+  -1 => "You lose! Better luck next time."
+}
+
 def new_deck
   Array.new(52) { |i| i }
 end
@@ -23,7 +33,7 @@ end
 def deal!(count, deck)
   dealt_cards = []
 
-  count.times { dealt_cards << deck.delete(deck.sample) }
+  count.times { dealt_cards << deck.delete_at(rand(deck.size)) }
 
   dealt_cards
 end
@@ -118,7 +128,7 @@ end
 def player_turn(deck, player_hand, dealer_hand)
   loop do
     display_hands(player_hand, dealer_hand)
-    # display_value(player_hand)
+    # display_value(player_hand) # I feel the game is more organic without this
     puts "What would you like to do? (Hit | Stay)"
 
     choice = get_option(%w(hit stay))
@@ -152,34 +162,16 @@ def compare_hands(player_hand, dealer_hand)
   player_value = hand_value(player_hand)
   dealer_value = hand_value(dealer_hand)
 
-  if player_value > 21
-    'player bust'
-  elsif player_value == 21 && dealer_value != 21
-    '21'
-  elsif dealer_value > 21
-    'dealer bust'
-  elsif dealer_value == 21 && player_value != 21
-    'dealer 21'
-  else
-    case player_value <=> dealer_value
-    when -1 then dealer_value == 21 ? 'dealer 21' : 'loss'
-    when 0 then 'tie'
-    when 1 then player_value == 21 ? '21' : 'win'
-    end
-  end
+  return 'pbust' if player_value > 21
+  return '21' if player_value == 21 && dealer_value != 21
+  return 'dbust' if dealer_value > 21
+  return 'd21' if dealer_value == 21 && player_value != 21
+
+  player_value <=> dealer_value
 end
 
 def print_winner(outcome)
-  text = case outcome
-         when 'player bust' then "Bust! Better luck next time."
-         when '21' then "21! Good job!"
-         when 'dealer bust' then "Dealer bust! You win!"
-         when 'win' then "You won! Good job!"
-         when 'tie' then "Tie! The dealers hand is equal to yours."
-         when 'dealer 21' then "Dealer 21! Better luck next time."
-         when 'loss' then "You lose! Better luck next time."
-         end
-  puts text
+  puts END_TEXTS[outcome]
 end
 
 puts "Welcome to Twenty-One!"
