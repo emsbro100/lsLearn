@@ -6,8 +6,6 @@ BOARD_LINES = [[1, 5, 9], [3, 5, 7], # Diagonal
                [1, 2, 3], [4, 5, 6], [7, 8, 9], # Horizontal
                [1, 4, 7], [2, 5, 8], [3, 6, 9]] # Vertical
 
-$statistics = false
-
 def generate_board
   (1..9).each_with_object({}) { |n, obj| obj[n] = ' ' }
 end
@@ -20,12 +18,6 @@ end
 
 def display(board)
   Gem.win_platform? ? (system "cls") : (system "clear")
-
-  if $statistics
-    puts "Total nodes: #{$total_nodes}"
-    puts "Time to calculate all nodes and move: #{$move_time} seconds."
-    $total_nodes = 0
-  end
 
   board_arr = []
   board.values.each_slice(3) { |slice| board_arr << slice }
@@ -121,14 +113,7 @@ def score_node(board, winning_char)
   end
 end
 
-if $statistics
-  $total_nodes = 0
-  $move_time = 0
-  require 'Time'
-end
-
 def generate_nodes(board, choice = nil, user = 'O', user_turn = true)
-  $total_nodes += 1 if $statistics
   tree = { choice: choice, score: nil, subtree: [] }
   positions_arr = empty_positions(board)
 
