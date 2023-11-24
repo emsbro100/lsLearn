@@ -34,7 +34,7 @@ def display(board)
   lines.each { |line| puts line }
 end
 
-def empty_positions(board)
+def get_empty_positions(board)
   empty = []
   board.each do |k, v|
     empty << k if v == ' '
@@ -73,6 +73,7 @@ def joinor(arr, delimiter=', ', final_delimiter='or')
     else
       joined_str << delimiter
     end
+
     joined_str << arr[num + 1].to_s
   end
 
@@ -81,9 +82,9 @@ end
 
 def find_at_risk_square(board, char)
   BOARD_LINES.each do |line| # Check for winners
-    values = line.each_with_object([]) { |pos, obj| obj << board[pos] }
-    if values.count(char) == 2 && values.include?(' ')
-      return line[values.find_index(' ')]
+    line_values = line.each_with_object([]) { |pos, obj| obj << board[pos] }
+    if line_values.count(char) == 2 && line_values.include?(' ')
+      return line[line_values.find_index(' ')]
     end
   end
 
@@ -115,7 +116,7 @@ end
 
 def generate_nodes(board, choice = nil, user = 'O', user_turn = true)
   tree = { choice: choice, score: nil, subtree: [] }
-  positions_arr = empty_positions(board)
+  positions_arr = get_empty_positions(board)
 
   opponent = user == 'O' ? 'X' : 'O'
   char = user_turn ? user : opponent
@@ -160,7 +161,7 @@ def minimax!(node, maximizing)
 end
 
 def ai_simple(board)
-  empty_positions(board).sample
+  get_empty_positions(board).sample
 end
 
 def ai_defensive(board)
@@ -177,18 +178,15 @@ def ai_offensive(board)
   defend_square = find_at_risk_square(board, 'X')
   return defend_square if defend_square
 
-  return 5 if empty_positions(board).include?(5)
+  return 5 if get_empty_positions(board).include?(5)
 
   ai_simple(board)
 end
 
 def ai_minimax(board)
-  t1 = Time.now
   node_tree = generate_nodes(board)
 
   score = minimax!(node_tree, true)
-  t2 = Time.now
-  $move_time = t2 - t1
 
   node_tree[:subtree].each do |node|
     return node[:choice] if node[:score] == score
@@ -197,8 +195,8 @@ end
 
 def player_turn(board)
   puts "Please enter the number of the position you want to put an X in:"
-  puts "(#{joinor(empty_positions(board))})"
-  update_board!(board, get_position(empty_positions(board)), 'X')
+  puts "(#{joinor(get_empty_positions(board))})"
+  update_board!(board, get_position(get_empty_positions(board)), 'X')
 end
 
 def computer_turn(board)
