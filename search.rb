@@ -186,9 +186,17 @@ def help(params)
 end
 
 
-search_single(term="shadow", wildcard=true, case_sensitive=false, recursive=true, path='ALL', paths=false, filetypes=['txt'])
+#search_single(term="shadow", wildcard=true, case_sensitive=false, recursive=true, path='ALL', paths=false, filetypes=['txt'])
 
+puts "Would you like to search using a phrase or a regex?"
+puts "(1) Phrase (2) Regex"
+type = gets.chomp == '1' ? "phrase" : "regex"
 
+puts "What term would you like to search for?"
+query = gets.chomp
+query = Regexp.new(query) if type == "regex"
+
+search_single(query, true, false, true, 'ALL', false, ['txt'])
 
 # improve print results and rest of program to print search term, and to print multiple terms for a search-multiple with hits for each
 
